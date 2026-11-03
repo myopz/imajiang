@@ -36,7 +36,15 @@ pnpm run deploy     # 构建并部署到 Cloudflare Workers
 pnpm run deploy:dry # 构建 + 部署演练（不实际上传）
 ```
 
-实际脚本以根目录 `package.json` 为准。Cloudflare 配置见 `wrangler.jsonc`（产物目录 `dist`，SPA 回退）。若用 Pages 连接 Git，Root directory 留空（仓库根），Build command `pnpm install && pnpm run build`，Build output directory `dist`。
+实际脚本以根目录 `package.json` 为准。Cloudflare 配置见 `wrangler.jsonc`（产物目录 `dist`，SPA 回退）。
+
+Workers Builds（Git 连接）需在 Dashboard → Settings → Build 中配置：
+
+- Root directory：留空（仓库根）
+- Build command：`pnpm run build`（必填；`dist/` 不入库，部署前必须先构建）
+- Deploy command：`npx wrangler deploy`（默认即可）
+
+也可把 Deploy command 设为 `pnpm run deploy`（内部会先 build 再 deploy）；此时 Build command 可留空，但不要两边都跑以免重复构建。
 
 `@/` 路径别名指向 `src/`。主要业务在 `src/game/`（牌局）与 `src/pages/Index.tsx`（牌桌界面）。
 
