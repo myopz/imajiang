@@ -41,13 +41,16 @@ function Melds({ melds, small, wild }: { melds: Meld[]; small?: boolean; wild?: 
   );
 }
 
-function SeatBadge({ p, seat, s }: { p: Player; seat: number; s: GameState }) {
+function SeatBadge({ p, seat, s, compact }: { p: Player; seat: number; s: GameState; compact?: boolean }) {
   const active = s.phase !== 'end' && s.turn === seat;
   return (
-    <div className={cn('inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs sm:text-sm mj-panel border',
-      active ? 'border-[#E8B04B] text-[#E8B04B]' : 'border-transparent')}>
-      <span className="font-brush text-base leading-none">{seatWind(seat, s.dealer)}</span>
-      <span className="font-semibold">{p.name}</span>
+    <div className={cn(
+      'inline-flex items-center rounded-full mj-panel border max-w-full',
+      compact ? 'flex-col gap-0 px-1.5 py-1 text-[10px] sm:text-xs' : 'gap-1.5 px-2.5 py-1 text-xs sm:text-sm',
+      active ? 'border-[#E8B04B] text-[#E8B04B]' : 'border-transparent',
+    )}>
+      <span className={cn('font-brush leading-none', compact ? 'text-sm' : 'text-base')}>{seatWind(seat, s.dealer)}</span>
+      <span className="font-semibold truncate">{p.name}</span>
       {s.dealer === seat && <span className="rounded-full bg-[#B3261E] px-1.5 text-[10px] text-white">庄</span>}
       <span className={p.score >= 0 ? 'text-[#9BE3B9]' : 'text-[#FF9C8F]'}>{p.score}</span>
     </div>
@@ -67,9 +70,9 @@ function Opponent({ s, seat, side }: { s: GameState; seat: number; side: 'left' 
   const reveal = s.phase === 'end';
   const vertical = side !== 'top';
   return (
-    <div className={cn('flex gap-2 items-center', vertical ? 'flex-col' : 'flex-col')}>
-      <SeatBadge p={p} seat={seat} s={s} />
-      <div className={cn('flex gap-[2px]', vertical ? 'flex-col' : 'flex-row flex-wrap justify-center')}>
+    <div className={cn('flex gap-1.5 sm:gap-2 items-center min-w-0', vertical ? 'flex-col max-w-full' : 'flex-col')}>
+      <SeatBadge p={p} seat={seat} s={s} compact={vertical} />
+      <div className={cn('flex gap-[2px] shrink-0', vertical ? 'flex-col' : 'flex-row flex-wrap justify-center')}>
         {reveal
           ? p.hand.map((t) => <MjTile key={t.id} k={t.k} size="river" wild={t.k === s.wild} />)
           : p.hand.map((t) => <TileBack key={t.id} vertical={vertical} />)}
@@ -158,40 +161,43 @@ export default function Index() {
           <button type="button" onClick={() => restart()} className={passBtn + ' min-h-8 px-3 text-sm'}>重新开始</button>
         </div>
       </header>
-      <div className="w-full max-w-[1200px] mb-2 px-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs sm:text-sm">
-        <span className="flex items-center gap-1.5">
-          <Die key={`a${s.round}-${s.dice[0]}`} n={s.dice[0]} rolling /><Die key={`b${s.round}-${s.dice[1]}`} n={s.dice[1]} rolling />
-          <span>骰子 {s.dice[0] + s.dice[1]} 点</span>
-        </span>
+      <div className="w-full max-w-[1200px] mb-1 px-1 flex items-center gap-x-3 text-[11px] sm:text-xs leading-snug min-h-0">
         {s.flipTile && (
-          <span className="flex items-center gap-1.5">赖子皮 <MjTile k={s.flipTile.k} size="river" /></span>
+          <span className="flex items-center gap-1 shrink-0">赖子皮 <MjTile k={s.flipTile.k} size="river" /></span>
         )}
         {s.wild !== null && (
-          <span className="flex items-center gap-1.5">赖子 <MjTile k={s.wild} size="river" wild /><span className="opacity-80">可当任意牌</span></span>
+          <span className="flex items-center gap-1 shrink-0">赖子 <MjTile k={s.wild} size="river" wild /><span className="opacity-80 hidden sm:inline">可当任意牌</span></span>
         )}
-        <span className="opacity-80">{rule.name}：{rule.summary.join('；')}</span>
+        <span className="opacity-70 min-w-0 flex-1 truncate" title={`${rule.name}：${rule.summary.join('；')}`}>
+          {rule.name}：{rule.summary.join('；')}
+        </span>
       </div>
 
-      <div className="mj-frame w-full max-w-[1200px] rounded-[28px] p-[10px]">
-        <div className="mj-felt relative rounded-[20px] p-2 sm:p-4 grid grid-cols-[auto_1fr_auto] grid-rows-[auto_1fr_auto] gap-2 sm:gap-3 min-h-[560px] sm:min-h-[680px]">
-          <div className="col-start-2 row-start-1 flex justify-center"><Opponent s={s} seat={2} side="top" /></div>
-          <div className="col-start-1 row-start-2 flex items-center"><Opponent s={s} seat={3} side="left" /></div>
-          <div className="col-start-3 row-start-2 flex items-center"><Opponent s={s} seat={1} side="right" /></div>
+      <div className="mj-frame w-full max-w-[1200px] rounded-[28px] p-[10px] overflow-hidden">
+        <div className="mj-felt relative rounded-[20px] p-2 sm:p-4 grid grid-cols-[56px_minmax(0,1fr)_56px] sm:grid-cols-[96px_minmax(0,1fr)_96px] grid-rows-[auto_minmax(0,1fr)_auto] gap-1.5 sm:gap-3 min-h-[560px] sm:min-h-[680px] overflow-hidden">
+          <div className="absolute top-2 left-2 z-10 flex items-center gap-1 pointer-events-none">
+            <Die key={`a${s.round}-${s.dice[0]}`} n={s.dice[0]} rolling />
+            <Die key={`b${s.round}-${s.dice[1]}`} n={s.dice[1]} rolling />
+            <span className="text-[11px] sm:text-xs opacity-80 whitespace-nowrap">{s.dice[0] + s.dice[1]} 点</span>
+          </div>
+          <div className="col-start-2 row-start-1 flex justify-center min-w-0"><Opponent s={s} seat={2} side="top" /></div>
+          <div className="col-start-1 row-start-2 flex items-center justify-center min-w-0 overflow-hidden"><Opponent s={s} seat={3} side="left" /></div>
+          <div className="col-start-3 row-start-2 flex items-center justify-center min-w-0 overflow-hidden"><Opponent s={s} seat={1} side="right" /></div>
 
-          <section className="col-start-2 row-start-2 grid grid-cols-[1fr_auto_1fr] grid-rows-[1fr_auto_1fr] gap-1.5 sm:gap-2 min-w-0">
-            <div className="col-start-2 row-start-1 mj-panel rounded-[12px] p-1.5 w-[140px] sm:w-[260px] lg:w-[320px]"><River p={s.players[2]} lastId={lastId} wild={s.wild} /></div>
-            <div className="col-start-1 row-start-2 mj-panel rounded-[12px] p-1.5 self-stretch"><River p={s.players[3]} lastId={lastId} wild={s.wild} /></div>
-            <div className="col-start-3 row-start-2 mj-panel rounded-[12px] p-1.5 self-stretch"><River p={s.players[1]} lastId={lastId} wild={s.wild} /></div>
-            <div className="col-start-2 row-start-2 relative mj-panel rounded-[16px] w-[140px] h-[140px] sm:w-[200px] sm:h-[200px] flex flex-col items-center justify-center gap-1 border border-[#E8B04B]/40">
+          <section className="col-start-2 row-start-2 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] grid-rows-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-1 sm:gap-2 min-w-0 w-full max-w-full overflow-hidden place-items-center">
+            <div className="col-start-2 row-start-1 mj-panel rounded-[12px] p-1 sm:p-1.5 w-[min(100%,140px)] sm:w-[260px] lg:w-[320px] max-h-full overflow-hidden"><River p={s.players[2]} lastId={lastId} wild={s.wild} /></div>
+            <div className="col-start-1 row-start-2 mj-panel rounded-[12px] p-1 sm:p-1.5 self-stretch justify-self-stretch w-full min-w-0 max-h-[140px] sm:max-h-[200px] overflow-hidden"><River p={s.players[3]} lastId={lastId} wild={s.wild} /></div>
+            <div className="col-start-3 row-start-2 mj-panel rounded-[12px] p-1 sm:p-1.5 self-stretch justify-self-stretch w-full min-w-0 max-h-[140px] sm:max-h-[200px] overflow-hidden"><River p={s.players[1]} lastId={lastId} wild={s.wild} /></div>
+            <div className="col-start-2 row-start-2 relative mj-panel rounded-[16px] w-[120px] h-[120px] sm:w-[200px] sm:h-[200px] flex flex-col items-center justify-center gap-0.5 sm:gap-1 border border-[#E8B04B]/40 shrink-0">
               {[0, 1, 2, 3].map((seat) => {
                 const pos = ['bottom-1 left-1/2 -translate-x-1/2', 'right-1.5 top-1/2 -translate-y-1/2', 'top-1 left-1/2 -translate-x-1/2', 'left-1.5 top-1/2 -translate-y-1/2'][seat];
                 const active = s.phase !== 'end' && s.turn === seat;
                 return <span key={seat} className={cn('absolute font-brush text-xl sm:text-2xl', pos, active ? 'text-[#E8B04B]' : 'text-[#F4EBD0]/50')}>{seatWind(seat, s.dealer)}</span>;
               })}
               {s.lastDiscard ? <MjTile k={s.lastDiscard.tile.k} size="big" highlight wild={s.lastDiscard.tile.k === s.wild} /> : <span className="text-xs opacity-70">等待出牌</span>}
-              <span className="text-[11px] sm:text-xs text-center px-6 leading-tight min-h-[2.4em]">{s.message || `${NAMES[s.turn]} 的回合`}</span>
+              <span className="text-[11px] sm:text-xs text-center px-5 sm:px-6 leading-tight min-h-[2.4em] max-w-full">{s.message || `${NAMES[s.turn]} 的回合`}</span>
             </div>
-            <div className="col-start-2 row-start-3 mj-panel rounded-[12px] p-1.5 w-[140px] sm:w-[260px] lg:w-[320px]"><River p={me} lastId={lastId} wild={s.wild} /></div>
+            <div className="col-start-2 row-start-3 mj-panel rounded-[12px] p-1 sm:p-1.5 w-[min(100%,140px)] sm:w-[260px] lg:w-[320px] max-h-full overflow-hidden"><River p={me} lastId={lastId} wild={s.wild} /></div>
           </section>
 
           <section className="col-span-3 row-start-3 flex flex-col items-center gap-2 min-w-0 overflow-hidden">
