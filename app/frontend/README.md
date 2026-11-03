@@ -13,6 +13,9 @@ pnpm run dev
 pnpm run build   # 生产构建
 pnpm run lint    # ESLint
 pnpm run preview # 本地预览构建产物
+pnpm run deploy  # 构建并部署到 Cloudflare Workers（静态资源）
 ```
+
+Cloudflare 配置见 `wrangler.jsonc`（产物目录 `dist`，SPA 回退）。若用 Pages 连接 Git，Root directory 设为 `app/frontend`，Build command `pnpm install && pnpm run build`，Build output directory `dist`。
 
 `@/` 路径别名指向 `src/`。主要业务在 `src/game/`（牌局）与 `src/pages/Index.tsx`（牌桌界面）。
