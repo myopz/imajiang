@@ -17,30 +17,37 @@
 - Tailwind CSS、PostCSS、shadcn/ui
 - SVG 牌面
 - ESLint、Playwright
+- Cloudflare Workers（静态资源部署）
 
 ## 快速开始
 
 ```bash
-cd app/frontend
 pnpm i
 pnpm run dev
 ```
 
-构建与检查：
+构建、检查与部署：
 
 ```bash
-pnpm run build
-pnpm run lint
+pnpm run build      # 生产构建 → dist/
+pnpm run lint       # ESLint
+pnpm run preview    # 本地预览构建产物
+pnpm run deploy     # 构建并部署到 Cloudflare Workers
+pnpm run deploy:dry # 构建 + 部署演练（不实际上传）
 ```
 
-实际脚本以 `app/frontend/package.json` 为准。
+实际脚本以根目录 `package.json` 为准。Cloudflare 配置见 `wrangler.jsonc`（产物目录 `dist`，SPA 回退）。若用 Pages 连接 Git，Root directory 留空（仓库根），Build command `pnpm install && pnpm run build`，Build output directory `dist`。
+
+`@/` 路径别名指向 `src/`。主要业务在 `src/game/`（牌局）与 `src/pages/Index.tsx`（牌桌界面）。
 
 ## 目录结构
 
 ```text
-app/frontend/
+.
 ├── DESIGN.md                 # 视觉设计规范
+├── wrangler.jsonc            # Cloudflare Workers 静态资源配置
 ├── prerender/                # 博客页面与站点地图预渲染
+├── plugins/                  # Vite 插件
 ├── public/                   # 静态资源
 ├── src/
 │   ├── components/
@@ -74,4 +81,4 @@ app/frontend/
 
 ## 设计
 
-牌桌视觉见 [`app/frontend/DESIGN.md`](app/frontend/DESIGN.md)：绿绒台面、胡桃木桌框、象牙牌面，偏茶馆实木风，不用科技/霓虹风格。
+牌桌视觉见 [`DESIGN.md`](./DESIGN.md)：绿绒台面、胡桃木桌框、象牙牌面，偏茶馆实木风，不用科技/霓虹风格。
