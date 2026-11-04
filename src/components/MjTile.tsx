@@ -5,10 +5,10 @@ import { NUM_CN, tileLabel } from '@/game/tiles';
 type Size = 'hand' | 'meld' | 'river' | 'big';
 
 const SIZE: Record<Size, string> = {
-  hand: 'w-[25px] h-[36px] sm:w-[38px] sm:h-[54px] lg:w-[46px] lg:h-[64px]',
-  meld: 'w-[20px] h-[28px] sm:w-[28px] sm:h-[40px]',
-  river: 'w-[18px] h-[25px] sm:w-[24px] sm:h-[34px] lg:w-[28px] lg:h-[39px]',
-  big: 'w-[40px] h-[56px] sm:w-[52px] sm:h-[72px]',
+  hand: 'w-[var(--hand-w,46px)] h-[var(--hand-h,64px)]',
+  meld: 'w-[34px] h-[48px]',
+  river: 'w-[var(--river-w,26px)] h-[var(--river-h,36px)]',
+  big: 'w-[52px] h-[72px]',
 };
 
 const RED = '#C0262D';
@@ -158,7 +158,7 @@ export function MjTile({ k, size = 'hand', highlight, wild, onClick, className }
         {face(k)}
       </svg>
       {wild && (
-        <span className="absolute -top-1 -right-1 rounded-full bg-[#E8B04B] text-[#3A220F] font-bold leading-none px-[3px] py-[2px] text-[8px] sm:text-[10px]">赖</span>
+        <span className="absolute -top-1 -right-1 rounded-full bg-[#E8B04B] text-[#3A220F] font-bold leading-none px-[3px] py-[2px] text-[10px]">赖</span>
       )}
     </Comp>
   );
@@ -166,7 +166,7 @@ export function MjTile({ k, size = 'hand', highlight, wild, onClick, className }
 
 export function TileBack({ vertical }: { vertical?: boolean }) {
   return (
-    <div className={cn('mj-back shrink-0 rounded-[3px]', vertical ? 'w-[22px] h-[12px] sm:w-[30px] sm:h-[16px]' : 'w-[12px] h-[18px] sm:w-[18px] sm:h-[26px]')} />
+    <div className={cn('mj-back shrink-0 rounded-[3px]', vertical ? 'w-[30px] h-[16px]' : 'w-[18px] h-[26px]')} />
   );
 }
 
@@ -178,7 +178,7 @@ const PIPS: Record<number, P[]> = {
 
 export function Die({ n, rolling }: { n: number; rolling?: boolean }) {
   return (
-    <svg viewBox="0 0 100 100" className={cn('w-7 h-7 sm:w-9 sm:h-9 drop-shadow', rolling && 'mj-roll')} role="img" aria-label={`骰子 ${n} 点`}>
+    <svg viewBox="0 0 100 100" className={cn('w-[2.6em] h-[2.6em] drop-shadow', rolling && 'mj-roll')} role="img" aria-label={`骰子 ${n} 点`}>
       <rect x={4} y={4} width={92} height={92} rx={18} fill="#FBF6E9" stroke="#D9CFB4" strokeWidth={3} />
       {PIPS[n].map(([x, y], i) => <circle key={i} cx={x} cy={y} r={n === 1 ? 14 : 9} fill={n === 1 || n === 4 ? RED : INK} />)}
     </svg>
